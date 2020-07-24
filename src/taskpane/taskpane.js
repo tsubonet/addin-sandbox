@@ -14,6 +14,14 @@ Office.onReady(info => {
 
     // Assign event handlers and other initialization logic.
     document.getElementById("create-table").onclick = createTable;
+
+    document.getElementById("filter-table").onclick = filterTable;
+    
+    document.getElementById("sort-table").onclick = sortTable;
+
+    document.getElementById("create-chart").onclick = createChart;
+
+    document.getElementById("freeze-header").onclick = freezeHeader;
     
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
@@ -48,6 +56,98 @@ function createTable() {
       expensesTable.columns.getItemAt(3).getRange().numberFormat = [['\u20AC#,##0.00']];
       expensesTable.getRange().format.autofitColumns();
       expensesTable.getRange().format.autofitRows();
+
+      return context.sync();
+  })
+  .catch(function (error) {
+      console.log("Error: " + error);
+      if (error instanceof OfficeExtension.Error) {
+          console.log("Debug info: " + JSON.stringify(error.debugInfo));
+      }
+  });
+}
+
+function filterTable() {
+  Excel.run(function (context) {
+
+      // TODO1: Queue commands to filter out all expense categories except
+      //        Groceries and Education.
+      var currentWorksheet = context.workbook.worksheets.getActiveWorksheet();
+      var expensesTable = currentWorksheet.tables.getItem('ExpensesTable');
+      var categoryFilter = expensesTable.columns.getItem('Category').filter;
+      categoryFilter.applyValuesFilter(['Education', 'Groceries']);
+
+      return context.sync();
+  })
+  .catch(function (error) {
+      console.log("Error: " + error);
+      if (error instanceof OfficeExtension.Error) {
+          console.log("Debug info: " + JSON.stringify(error.debugInfo));
+      }
+  });
+}
+
+function sortTable() {
+  Excel.run(function (context) {
+
+      // TODO1: Queue commands to sort the table by Merchant name.
+      var currentWorksheet = context.workbook.worksheets.getActiveWorksheet();
+      var expensesTable = currentWorksheet.tables.getItem('ExpensesTable');
+      var sortFields = [
+          {
+              key: 1,            // Merchant column
+              ascending: false,
+          }
+      ];
+
+      expensesTable.sort.apply(sortFields);
+
+      return context.sync();
+  })
+  .catch(function (error) {
+      console.log("Error: " + error);
+      if (error instanceof OfficeExtension.Error) {
+          console.log("Debug info: " + JSON.stringify(error.debugInfo));
+      }
+  });
+}
+
+function createChart() {
+  Excel.run(function (context) {
+
+      // TODO1: Queue commands to get the range of data to be charted.
+      var currentWorksheet = context.workbook.worksheets.getActiveWorksheet();
+      var expensesTable = currentWorksheet.tables.getItem('ExpensesTable');
+      var dataRange = expensesTable.getDataBodyRange();
+
+      // TODO2: Queue command to create the chart and define its type.
+      var chart = currentWorksheet.charts.add('ColumnClustered', dataRange, 'auto');
+
+      // TODO3: Queue commands to position and format the chart.
+      chart.setPosition("A15", "F30");
+      chart.title.text = "Expenses";
+      chart.legend.position = "right"
+      chart.legend.format.fill.setSolidColor("white");
+      chart.dataLabels.format.font.size = 15;
+      chart.dataLabels.format.font.color = "black";
+      chart.series.getItemAt(0).name = 'Value in &euro;';
+
+      return context.sync();
+  })
+  .catch(function (error) {
+      console.log("Error: " + error);
+      if (error instanceof OfficeExtension.Error) {
+          console.log("Debug info: " + JSON.stringify(error.debugInfo));
+      }
+  });
+}
+
+function freezeHeader() {
+  Excel.run(function (context) {
+
+      // TODO1: Queue commands to keep the header visible when the user scrolls.
+      var currentWorksheet = context.workbook.worksheets.getActiveWorksheet();
+      currentWorksheet.freezePanes.freezeRows(1);
 
       return context.sync();
   })
