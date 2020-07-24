@@ -12,7 +12,8 @@ module.exports = async (env, options) => {
     entry: {
       polyfill: "@babel/polyfill",
       taskpane: "./src/taskpane/taskpane.js",
-      commands: "./src/commands/commands.js"
+      commands: "./src/commands/commands.js",
+      popup: "./src/dialogs/popup.js"
     },
     resolve: {
       extensions: [".ts", ".tsx", ".html", ".js"]
@@ -48,15 +49,20 @@ module.exports = async (env, options) => {
         chunks: ["polyfill", "taskpane"]
       }),
       new CopyWebpackPlugin([
-        {
-          to: "taskpane.css",
-          from: "./src/taskpane/taskpane.css"
-        }
+      {
+        to: "taskpane.css",
+        from: "./src/taskpane/taskpane.css"
+      }
       ]),
       new HtmlWebpackPlugin({
         filename: "commands.html",
         template: "./src/commands/commands.html",
         chunks: ["polyfill", "commands"]
+      }),
+      new HtmlWebpackPlugin({
+        filename: "popup.html",
+        template: "./src/dialogs/popup.html",
+        chunks: ["polyfill", "popup"]
       })
     ],
     devServer: {

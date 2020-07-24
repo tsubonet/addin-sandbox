@@ -22,6 +22,8 @@ Office.onReady(info => {
     document.getElementById("create-chart").onclick = createChart;
 
     document.getElementById("freeze-header").onclick = freezeHeader;
+
+    document.getElementById("open-dialog").onclick = openDialog;
     
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
@@ -179,4 +181,24 @@ export async function run() {
   } catch (error) {
     console.error(error);
   }
+}
+
+var dialog = null;
+
+function openDialog() {
+  // TODO1: Call the Office Common API that opens a dialog
+  Office.context.ui.displayDialogAsync(
+      'https://localhost:3000/popup.html',
+      {height: 45, width: 55},
+      // TODO2: Add callback parameter.
+      function (result) {
+        dialog = result.value;
+        dialog.addEventHandler(Microsoft.Office.WebExtension.EventType.DialogMessageReceived, processMessage);
+      }
+  );
+}
+
+function processMessage(arg) {
+  document.getElementById("user-name").innerHTML = arg.message;
+  dialog.close();
 }
